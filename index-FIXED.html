@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BUTTERFLY — Horlogerie Fix Opacité</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400&family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#07070b;--ink:#f3ece0;--muted:#8a8275;--gold:#d4a958;--line:rgba(212,169,88,0.22);--panel:rgba(14,12,10,0.7);}
+  *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif}
+  canvas{display:block;position:fixed;inset:0;z-index:0;cursor:grab}
+  .vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.55) 100%);}
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:0.04;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.7'/></svg>");}
+  header{position:fixed;top:30px;left:34px;z-index:10;pointer-events:none}
+  header .brand{font-family:'Cormorant Garamond',serif;font-size:22px;letter-spacing:0.32em;color:var(--ink)} header .brand span{color:var(--gold)}
+  header .tag{margin-top:6px;font-size:10px;letter-spacing:0.42em;color:var(--muted);text-transform:uppercase}
+  .topright{position:fixed;top:30px;right:34px;z-index:10;display:flex;gap:10px}
+  .pill{border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(8px);color:var(--ink);padding:10px 16px;font-size:10px;letter-spacing:0.3em;text-transform:uppercase;cursor:pointer;border-radius:999px;transition:all .3s}
+  .pill:hover{border-color:var(--gold);color:var(--gold)} .pill.active{background:var(--gold);color:#0c0a08}
+  .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ff4d4d;margin-right:8px;box-shadow:0 0 8px #ff4d4d;animation:pulse 1.6s infinite} @keyframes pulse{50%{opacity:0.35}}
+  .legend{position:fixed;bottom:28px;left:34px;z-index:10;display:flex;gap:16px;flex-wrap:wrap;max-width:55%}
+  .legend .item{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:0.18em;color:var(--muted);text-transform:uppercase}
+  .legend .dot{width:9px;height:9px;border-radius:50%;border:1px solid currentColor}
+  .legend .confirmed{color:#e9c47a} .legend .expected{color:#cfd9e8} .legend .proposed{color:#8fb8d8} .legend .uncertain{color:#d8a36a} .legend .waiting{color:#9a9387} .legend .conflict{color:#d97a7a}
+  .hint{position:fixed;bottom:28px;right:34px;z-index:10;text-align:right;font-size:10px;letter-spacing:0.25em;color:var(--muted);text-transform:uppercase;line-height:1.9}
+  .hint b{color:var(--gold)}
+  #info{position:fixed;left:34px;top:50%;transform:translateY(-50%) translateX(-20px);z-index:11;width:300px;background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--line);padding:22px 24px;opacity:0;pointer-events:none;transition:opacity 0.5s, transform 0.5s}
+  #info.show{opacity:1;transform:translateY(-50%) translateX(0);pointer-events:auto}
+  #info .kicker{font-size:9px;letter-spacing:0.4em;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
+  #info .name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;line-height:1.1;margin-bottom:14px}
+  #info .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11px}
+  #info .row .k{color:var(--muted);letter-spacing:0.14em;text-transform:uppercase;font-size:9px}
+  #info .row .v{color:var(--ink);font-family:'Cormorant Garamond',serif;font-size:16px}
+  #info .status{display:inline-block;margin-top:12px;padding:5px 12px;border:1px solid;font-size:9px;letter-spacing:0.3em;text-transform:uppercase}
+  #info .close{position:absolute;top:12px;right:14px;cursor:pointer;color:var(--muted)} #info .close:hover{color:var(--gold)}
+  #toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:12;text-align:center;pointer-events:none;opacity:0;transition:opacity 0.6s}
+  #toast.show{opacity:1} #toast .label{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:30px;color:var(--gold)} #toast .impact{font-size:10px;letter-spacing:0.5em;color:var(--ink);margin-top:6px;text-transform:uppercase;opacity:0.8}
+  #opening{position:fixed;inset:0;z-index:50;background:#040406;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;transition:opacity 1.2s ease}
+  #opening .mark{font-family:'Cormorant Garamond',serif;letter-spacing:0.55em;font-size:13px;color:var(--gold)}
+  #opening .title{font-family:'Cormorant Garamond',serif;font-size:clamp(34px,6vw,72px);color:var(--ink)}
+  #opening .sub{font-size:12px;letter-spacing:0.5em;color:var(--muted);text-transform:uppercase}
+  #opening .enter{margin-top:26px;border:1px solid var(--gold);background:transparent;color:var(--gold);padding:14px 34px;letter-spacing:0.35em;font-size:11px;text-transform:uppercase;cursor:pointer;transition:all 0.4s}
+  #opening .enter:hover{background:var(--gold);color:#0c0a08}
+</style>
+</head>
+<body>
+<div class="vignette"></div><div class="grain"></div>
+<div id="opening"><div class="mark">HAUTE HORLOGERIE × WEDDING — FIX OPACITÉ</div><div class="title">Butterfly Effect</div><div class="sub">Version sans bloom double — horlogerie nette</div><button class="enter" id="enterBtn">Enter</button></div>
+<header><div class="brand">BUTTERFLY <span>EFFECT</span></div><div class="tag">Horlogerie visible · Fix opacité</div></header>
+<div class="topright"><button class="pill" id="liveBtn"><span class="live-dot"></span>LIVE</button><button class="pill" id="resetBtn">Reset</button><button class="pill" id="soundBtn">Son</button></div>
+<div class="legend"><div class="item confirmed"><span class="dot"></span>Confirmed</div><div class="item expected"><span class="dot"></span>Expected</div><div class="item proposed"><span class="dot"></span>Proposed</div><div class="item uncertain"><span class="dot"></span>Uncertain</div><div class="item waiting"><span class="dot"></span>Waiting</div><div class="item conflict"><span class="dot"></span>Conflict</div></div>
+<div class="hint"><div><b>Drag perle</b> — change heure</div><div><b>Click centre</b> — souffle</div></div>
+<div id="info"><div class="close" id="infoClose">✕</div><div class="kicker" id="iKicker">MOMENT</div><div class="name" id="iName">Ceremony</div><div class="row"><span class="k">Time</span><span class="v" id="iTime">16:00</span></div><div class="row"><span class="k">Duration</span><span class="v" id="iDur">1h 00m</span></div><div class="row"><span class="k">Location</span><span class="v" id="iLoc">Chapel</span></div><div class="row"><span class="k">People</span><span class="v" id="iPpl">82</span></div><div class="row"><span class="k">Music</span><span class="v" id="iMus">String Quartet</span></div><div class="status" id="iStatus">CONFIRMED</div></div>
+<div id="toast"><div class="label">Butterfly Effect</div><div class="impact" id="toastImpact">Small impact</div></div>
+<canvas id="c"></canvas>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const COLORS={confirmed:0xe9c47a,expected:0xcfd9e8,proposed:0x8fb8d8,uncertain:0xd8a36a,waiting:0x9a9387,conflict:0xd97a7a};
+const moments=[
+  { id:'arrival', name:'Arrival', time:14.0, dur:0.5, loc:'Manor Gate', ppl:18, music:'Ambient birds', status:'confirmed', deps:[] },
+  { id:'ceremony', name:'Ceremony', time:16.0, dur:1.0, loc:'Rose Chapel', ppl:82, music:'String Quartet', status:'confirmed', deps:['arrival'] },
+  { id:'cocktail', name:'Cocktail', time:17.0, dur:1.5, loc:'Garden Terrace', ppl:96, music:'Harp & Cello', status:'confirmed', deps:['ceremony'] },
+  { id:'photos', name:'Photos', time:17.5, dur:1.5, loc:'Vineyard Walk', ppl:14, music:'—', status:'proposed', deps:['ceremony'] },
+  { id:'dinner', name:'Dinner', time:19.5, dur:2.0, loc:'Glass Pavilion', ppl:96, music:'Piano nocturnes', status:'expected', deps:['cocktail','photos'] },
+  { id:'speeches', name:'Speeches', time:21.0, dur:0.5, loc:'Glass Pavilion', ppl:96, music:'—', status:'expected', deps:['dinner'] },
+  { id:'firstdance',name:'First Dance', time:21.5, dur:0.5, loc:'Glass Pavilion', ppl:96, music:'Their song', status:'proposed', deps:['speeches'] },
+  { id:'party', name:'Party', time:22.0, dur:1.5, loc:'Glass Pavilion', ppl:90, music:'DJ Set', status:'confirmed', deps:['firstdance'] },
+  { id:'departure', name:'Departure', time:23.5, dur:0.5, loc:'Manor Gate', ppl:60, music:'Last waltz', status:'waiting', deps:['party'] },
+];
+
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.05;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.setClearColor(0x07070b,1);
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x07070b);
+scene.fog=new THREE.FogExp2(0x07070b,0.045);
+
+const camera=new THREE.PerspectiveCamera(34,innerWidth/innerHeight,0.1,100);
+camera.position.set(0,4.2,13);
+const controls=new OrbitControls(camera,canvas);
+controls.enableDamping=true; controls.dampingFactor=0.06; controls.minDistance=4; controls.maxDistance=24; controls.target.set(0,0.6,0);
+
+scene.add(new THREE.AmbientLight(0x40342a,0.6));
+const key=new THREE.SpotLight(0xfff0d8,3.0,30,Math.PI/4,0.5,1.0); key.position.set(6,9,5); scene.add(key);
+const fill=new THREE.PointLight(0x6e88c4,0.8,30); fill.position.set(-6,1,-4); scene.add(fill);
+const rim=new THREE.PointLight(0xffb873,1.0,25); rim.position.set(0,-2,7); scene.add(rim);
+const coreLight=new THREE.PointLight(0xffd9a0,1.2,8,2); coreLight.position.set(0,0.6,0); scene.add(coreLight);
+
+const M={
+  gold:new THREE.MeshStandardMaterial({color:0xd4a958,metalness:0.9,roughness:0.25}),
+  goldDark:new THREE.MeshStandardMaterial({color:0x8a6a30,metalness:0.9,roughness:0.45}),
+  ivory:new THREE.MeshStandardMaterial({color:0xf3ece0,metalness:0.1,roughness:0.6}),
+  brushed:new THREE.MeshStandardMaterial({color:0xa59c8c,metalness:0.8,roughness:0.5}),
+  steel:new THREE.MeshStandardMaterial({color:0x9a958a,metalness:0.8,roughness:0.3}),
+  glass:new THREE.MeshStandardMaterial({color:0xffffff,metalness:0.1,roughness:0.1,transparent:true,opacity:0.35}),
+  pearl:new THREE.MeshStandardMaterial({color:0xfaf6ee,metalness:0.1,roughness:0.2}),
+};
+function glowMat(c,i){return new THREE.MeshStandardMaterial({color:0x000000,emissive:new THREE.Color(c),emissiveIntensity:i});}
+
+const jewel=new THREE.Group(); jewel.position.y=0.6; scene.add(jewel);
+
+const base=new THREE.Group(); jewel.add(base);
+const basePlate=new THREE.Mesh(new THREE.CylinderGeometry(3.4,3.6,0.18,96,1),M.ivory); basePlate.position.y=-1.2; base.add(basePlate);
+const baseRim=new THREE.Mesh(new THREE.TorusGeometry(3.4,0.06,24,96),M.gold); baseRim.rotation.x=Math.PI/2; baseRim.position.y=-1.11; base.add(baseRim);
+for(let i=0;i<48;i++){const a=(i/48)*Math.PI*2; const tick=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.005,i%4===0?0.12:0.06),M.goldDark); tick.position.set(Math.cos(a)*3.05,-1.105,Math.sin(a)*3.05); tick.rotation.y=-a; base.add(tick);}
+
+const rings=new THREE.Group(); jewel.add(rings);
+function makeRing(r,t,m){const mesh=new THREE.Mesh(new THREE.TorusGeometry(r,t,18,96),m); mesh.rotation.x=Math.PI/2; return mesh;}
+const outerRing=makeRing(3.0,0.05,M.gold); rings.add(outerRing);
+for(let i=0;i<120;i++){const a=(i/120)*Math.PI*2; const tooth=new THREE.Mesh(new THREE.BoxGeometry(0.025,0.02,0.06),M.gold); tooth.position.set(Math.cos(a)*3.04,0,Math.sin(a)*3.04); tooth.rotation.y=-a; outerRing.add(tooth);}
+const midRing=makeRing(2.45,0.035,M.brushed); rings.add(midRing);
+const innerRing=makeRing(1.75,0.04,M.gold); rings.add(innerRing);
+const coreRing=makeRing(1.0,0.03,M.steel); rings.add(coreRing);
+
+function makeGear(radius,teeth,thick,mat){
+  const g=new THREE.Group(); const body=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,thick,32),mat); body.rotation.x=Math.PI/2; g.add(body);
+  for(let i=0;i<teeth;i++){const a=(i/teeth)*Math.PI*2; const t=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.08,thick*1.1),mat); t.position.set(Math.cos(a)*(radius+0.04),Math.sin(a)*(radius+0.04),0); t.rotation.z=a; g.add(t);}
+  const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,thick*1.3,12),M.steel); hub.rotation.x=Math.PI/2; g.add(hub); return g;
+}
+const gears=new THREE.Group(); jewel.add(gears);
+const gear1=makeGear(0.55,18,0.06,M.gold); gear1.position.set(2.0,0.4,0); gears.add(gear1);
+const gear2=makeGear(0.35,12,0.06,M.brushed); gear2.position.set(2.65,0.4,0); gears.add(gear2);
+const gear3=makeGear(0.45,14,0.05,M.steel); gear3.position.set(-2.2,-0.2,0.6); gears.add(gear3);
+const gear4=makeGear(0.28,10,0.05,M.gold); gear4.position.set(-2.78,-0.2,0.6); gears.add(gear4);
+
+const coreGroup=new THREE.Group(); jewel.add(coreGroup);
+const coreCrystal=new THREE.Mesh(new THREE.IcosahedronGeometry(0.42,2),M.glass); coreGroup.add(coreCrystal);
+const coreInner=new THREE.Mesh(new THREE.IcosahedronGeometry(0.25,1), new THREE.MeshStandardMaterial({color:0xfff2d8,emissive:0xffc878,emissiveIntensity:1.2,transparent:true,opacity:0.9})); coreGroup.add(coreInner);
+const nowPointer=new THREE.Mesh(new THREE.ConeGeometry(0.08,0.4,4),M.gold); nowPointer.rotation.z=-Math.PI/2; nowPointer.position.x=0.6; coreGroup.add(nowPointer);
+const pointerRing=new THREE.Mesh(new THREE.TorusGeometry(0.7,0.012,12,32),M.steel); pointerRing.rotation.x=Math.PI/2; coreGroup.add(pointerRing);
+const dome=new THREE.Mesh(new THREE.SphereGeometry(3.55,48,24,0,Math.PI*2,0,Math.PI*0.5), new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0.18,roughness:0.1,metalness:0.1})); dome.position.y=0; dome.scale.y=0.7; jewel.add(dome);
+
+function makeWing(){
+  const s=new THREE.Shape(); s.moveTo(0.02,0); s.bezierCurveTo(0.22,0.42,0.72,0.88,1.26,0.88); s.bezierCurveTo(1.74,0.88,1.80,0.44,1.30,0.15); s.bezierCurveTo(1.58,-0.06,1.44,-0.64,0.99,-0.70); s.bezierCurveTo(0.58,-0.74,0.22,-0.36,0.0,-0.05); s.closePath();
+  const geo=new THREE.ExtrudeGeometry(s,{depth:0.02,bevelEnabled:false,curveSegments:12}); geo.rotateX(-Math.PI/2); return geo;
+}
+const butterfly={root:new THREE.Group(),spin:new THREE.Group(),wings:[],phase:0};
+{
+  butterfly.root.add(butterfly.spin); butterfly.root.position.set(0,0.9,0); butterfly.root.rotation.x=-0.35; butterfly.root.scale.setScalar(0.55); coreGroup.add(butterfly.root);
+  const thorax=new THREE.Mesh(new THREE.SphereGeometry(0.088,12,10),M.ivory); butterfly.spin.add(thorax);
+  const heart=new THREE.Mesh(new THREE.SphereGeometry(0.05,10,8),glowMat(0xffe2bb,2.0)); butterfly.spin.add(heart); butterfly.heart=heart.material;
+  const wingGeo=makeWing(); const dotMat=glowMat(0xffdcae,1.5);
+  for(const s of [1,-1]){const pivot=new THREE.Group(); pivot.position.set(0,0.02,0); pivot.scale.x=s; const wing=new THREE.Mesh(wingGeo,new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0.55,roughness:0.2})); pivot.add(wing); for(const p of [[0.6,-0.4],[0.9,-0.5],[0.4,-0.15]]){const dot=new THREE.Mesh(new THREE.SphereGeometry(0.04,8,6),dotMat); dot.position.set(p[0],0.014,p[1]); pivot.add(dot);} butterfly.spin.add(pivot); butterfly.wings.push({pivot,side:s});}
+}
+
+const momentPearls=new THREE.Group(); jewel.add(momentPearls);
+const ORBIT_RADIUS=2.45, TIME_MIN=13, TIME_MAX=25;
+function timeToAngle(t){return (t-TIME_MIN)/(TIME_MAX-TIME_MIN)*Math.PI*2 - Math.PI/2;}
+function fmtTime(t){const h=Math.floor(t), m=Math.round((t-h)*60); return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}
+const pearlMeshes={};
+moments.forEach(m=>{
+  const g=new THREE.Group();
+  const pearl=new THREE.Mesh(new THREE.SphereGeometry(0.13,24,18), new THREE.MeshStandardMaterial({color:0xfaf6ee,emissive:COLORS[m.status],emissiveIntensity:0.4}));
+  g.add(pearl);
+  const socket=new THREE.Mesh(new THREE.TorusGeometry(0.17,0.012,8,24),M.gold); socket.rotation.x=Math.PI/2; g.add(socket);
+  const halo=new THREE.Mesh(new THREE.RingGeometry(0.2,0.24,24), new THREE.MeshBasicMaterial({color:COLORS[m.status],transparent:true,opacity:0.4,side:THREE.DoubleSide})); halo.rotation.x=Math.PI/2; g.add(halo);
+  g.userData={moment:m, pearl, halo, phase:Math.random()*Math.PI*2, pulseUntil:0}; momentPearls.add(g); pearlMeshes[m.id]=g;
+});
+
+const lineGroup=new THREE.Group(); jewel.add(lineGroup); const connections=[];
+function rebuild(){
+  while(lineGroup.children.length) lineGroup.remove(lineGroup.children[0]); connections.length=0;
+  moments.forEach(m=>{m.deps.forEach(depId=>{const a=pearlMeshes[m.id], b=pearlMeshes[depId]; if(!a||!b) return; const geo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]); const mat=new THREE.LineBasicMaterial({color:0xd4a958,transparent:true,opacity:0.2}); const line=new THREE.Line(geo,mat); line.userData={a,b,base:0.2,pulse:0}; lineGroup.add(line); connections.push(line);});});
+}
+rebuild();
+
+// simple pulses without shader double
+const pulseGeo=new THREE.SphereGeometry(1,16,12);
+const pulses=[];
+function spawnPulse(pos,strength){
+  const mat=new THREE.MeshBasicMaterial({color:0xffdcae,transparent:true,opacity:0.35,wireframe:false});
+  const mesh=new THREE.Mesh(pulseGeo,mat); mesh.position.copy(pos); mesh.scale.setScalar(0.01); scene.add(mesh);
+  pulses.push({mesh,mat,radius:0.01,speed:4+strength*2,strength,life:0});
+}
+function breathe(s){const p=new THREE.Vector3(0,0.9,0); coreGroup.localToWorld(p); spawnPulse(p,s);}
+
+let audioCtx=null, audioOn=false;
+const SCALE=[523,587,659,698,783,880,1046];
+function ensureAudio(){if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume();}
+function chime(i){if(!audioCtx||!audioOn) return; const t=audioCtx.currentTime; const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.frequency.value=SCALE[i%SCALE.length]; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.12,t+0.01); g.gain.exponentialRampToValueAtTime(0.001,t+1.2); o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+1.3);}
+
+const raycaster=new THREE.Raycaster(), pointer=new THREE.Vector2();
+let hovered=null, selected=null, dragging=null, liveMode=false, toastTimer=null, camTween=null, energy=0;
+function setCamTween(toP,toT,dur){camTween={fromP:camera.position.clone(),toP:toP.clone(),fromT:controls.target.clone(),toT:toT.clone(),t:0,dur}; controls.autoRotate=false;}
+function findGroup(child){let o=child; while(o&&o.parent!==momentPearls) o=o.parent; return o;}
+function getMoment(){raycaster.setFromCamera(pointer,camera); const hits=raycaster.intersectObjects(momentPearls.children,true); return hits.length?findGroup(hits[0].object):null;}
+
+canvas.addEventListener('pointermove', e=>{
+  pointer.x=(e.clientX/innerWidth)*2-1; pointer.y=-(e.clientY/innerHeight)*2+1;
+  if(dragging){
+    const center=new THREE.Vector3(0,0.6,0); center.project(camera); const cx=(center.x+1)/2*innerWidth, cy=(-center.y+1)/2*innerHeight;
+    const ang=Math.atan2(e.clientX-cx, -(e.clientY-cy)); if(!dragging.lastAng) dragging.lastAng=ang; let d=ang-dragging.lastAng; if(d>Math.PI) d-=Math.PI*2; if(d<-Math.PI) d+=Math.PI*2; dragging.lastAng=ang;
+    const delta=-d/(Math.PI*2)*(TIME_MAX-TIME_MIN); applyDelta(dragging.obj.userData.moment.id, delta); return;
+  }
+  const g=getMoment(); if(hovered!==g){if(hovered) hovered.userData.pearl.material.emissiveIntensity=0.4; hovered=g; if(hovered) hovered.userData.pearl.material.emissiveIntensity=0.9; canvas.style.cursor=hovered?'pointer':'grab';}
+});
+canvas.addEventListener('pointerdown', e=>{
+  pointer.x=(e.clientX/innerWidth)*2-1; pointer.y=-(e.clientY/innerHeight)*2+1; ensureAudio();
+  const g=getMoment(); if(g){dragging={obj:g,lastAng:null}; selectPearl(g.userData.moment.id); controls.enabled=false; return;}
+  raycaster.setFromCamera(pointer,camera); if(raycaster.intersectObject(coreGroup,true).length){breathe(1.2); chime(4);}
+});
+addEventListener('pointerup', ()=>{if(dragging){dragging=null; controls.enabled=true;}});
+
+function propagate(id,delta,visited){
+  const out=[]; moments.forEach(m=>{if(m.deps.includes(id)&&!visited.has(m.id)){visited.add(m.id); const old=m.time; m.time=Math.max(TIME_MIN,Math.min(TIME_MAX,m.time+delta)); m.time=Math.round(m.time*20)/20; out.push({id:m.id,name:m.name,time:m.time}); out.push(...propagate(m.id,m.time-old,visited));}}); return out;
+}
+function applyDelta(id,delta){
+  if(Math.abs(delta)<0.001) return;
+  const chain=propagate(id,delta,new Set());
+  const src=pearlMeshes[id]; const origin=new THREE.Vector3(); src.getWorldPosition(origin); spawnPulse(origin,0.5+chain.length*0.1);
+  chain.forEach((c,i)=>{setTimeout(()=>{const o=pearlMeshes[c.id]; if(o) o.userData.pulseUntil=performance.now()+1200; connections.forEach(l=>{const ud=l.userData; if((ud.a.userData.moment.id===id&&ud.b.userData.moment.id===c.id)||(ud.b.userData.moment.id===id&&ud.a.userData.moment.id===c.id)) ud.pulse=1;});}, i*150);});
+  const t=document.getElementById('toast'); t.classList.add('show'); document.getElementById('toastImpact').textContent=(chain.length>5?'Large':chain.length>2?'Medium':'Small')+` impact · ${chain.length+1} shifted`; clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
+}
+function selectPearl(id){
+  const m=moments.find(x=>x.id===id); if(!m) return;
+  document.getElementById('iKicker').textContent='MOMENT · '+m.id.toUpperCase(); document.getElementById('iName').textContent=m.name; document.getElementById('iTime').textContent=fmtTime(m.time); document.getElementById('iDur').textContent=(m.dur>=1?Math.floor(m.dur)+'h ':'')+Math.round((m.dur%1)*60)+'m'; document.getElementById('iLoc').textContent=m.loc; document.getElementById('iPpl').textContent=m.ppl; document.getElementById('iMus').textContent=m.music; const st=document.getElementById('iStatus'); st.textContent=m.status.toUpperCase(); const col=new THREE.Color(COLORS[m.status]); st.style.color='#'+col.getHexString(); st.style.borderColor='#'+col.getHexString(); document.getElementById('info').classList.add('show');
+  const target=new THREE.Vector3(); pearlMeshes[id].getWorldPosition(target); const dir=target.clone().sub(new THREE.Vector3(0,0.6,0)).normalize(); const dest=target.clone().add(dir.multiplyScalar(2.2)).add(new THREE.Vector3(0,0.4,0)); setCamTween(dest,target,1.0);
+}
+document.getElementById('infoClose').addEventListener('click',()=>{document.getElementById('info').classList.remove('show'); setCamTween(new THREE.Vector3(0,4.2,13),new THREE.Vector3(0,0.6,0),1.0);});
+document.getElementById('resetBtn').addEventListener('click',()=>setCamTween(new THREE.Vector3(0,4.2,13),new THREE.Vector3(0,0.6,0),1.0));
+document.getElementById('liveBtn').addEventListener('click',()=>{liveMode=!liveMode; document.getElementById('liveBtn').classList.toggle('active',liveMode);});
+document.getElementById('soundBtn').addEventListener('click',()=>{if(!audioOn){ensureAudio(); audioOn=true; document.getElementById('soundBtn').classList.add('active');} else {audioOn=false; document.getElementById('soundBtn').classList.remove('active');}});
+document.getElementById('enterBtn').addEventListener('click',()=>{const o=document.getElementById('opening'); o.style.opacity='0'; setTimeout(()=>o.style.display='none',1000); ensureAudio(); breathe(0.8);});
+
+jewel.scale.setScalar(0.001); let openingT=0, openingActive=true;
+const clock=new THREE.Clock(); let time=0, nowTime=17.0;
+function findNow(){let best=null,bd=Infinity; moments.forEach(m=>{const d=Math.abs(m.time-nowTime); if(d<bd){bd=d; best=m;}}); return best;}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=clock.getDelta(); time+=dt;
+  if(openingActive){openingT+=dt; const s=Math.min(1,openingT/2.0); const e=1-Math.pow(1-s,3); jewel.scale.setScalar(0.001+e*0.999); if(s>=1) openingActive=false;}
+  outerRing.rotation.z+=dt*0.05; midRing.rotation.z-=dt*0.07; innerRing.rotation.z+=dt*0.11; coreRing.rotation.z-=dt*0.18; pointerRing.rotation.z+=dt*0.22;
+  gear1.rotation.z+=dt*0.35; gear2.rotation.z-=dt*0.55; gear3.rotation.z-=dt*0.42; gear4.rotation.z+=dt*0.7;
+  butterfly.phase+=dt*(4.0+energy*1.5); const flap=Math.sin(butterfly.phase); const ang=0.13+flap*0.5; for(const w of butterfly.wings) w.pivot.rotation.z=w.side*ang; butterfly.spin.rotation.y+=dt*0.2; if(butterfly.heart) butterfly.heart.emissiveIntensity=1.5+Math.abs(flap)*1.0+energy;
+  coreCrystal.rotation.y+=dt*0.2;
+  const nowP=findNow(); if(nowP){const ta=timeToAngle(nowP.time); let d=ta-nowPointer.rotation.y; if(d>Math.PI) d-=Math.PI*2; if(d<-Math.PI) d+=Math.PI*2; nowPointer.rotation.y+=d*Math.min(1,dt*3);}
+  moments.forEach(m=>{const g=pearlMeshes[m.id]; const a=timeToAngle(m.time); const jit=(m.status==='uncertain'||m.status==='proposed'||m.status==='waiting')?1:0.15; const jx=Math.sin(time*2.3+g.userData.phase)*0.025*jit; const jy=Math.cos(time*1.7+g.userData.phase)*0.035*jit; const jz=Math.sin(time*3.1+g.userData.phase)*0.025*jit; g.position.set(Math.cos(a)*ORBIT_RADIUS+jx, jy+0.05, Math.sin(a)*ORBIT_RADIUS+jz); if(g.userData.pulseUntil&&performance.now()<g.userData.pulseUntil){g.userData.pearl.material.emissiveIntensity=1.2; g.userData.halo.scale.setScalar(1.4);} else {g.userData.pearl.material.emissiveIntensity=0.4+(g===hovered?0.5:0); g.userData.halo.scale.setScalar(1);} });
+  connections.forEach(l=>{const ud=l.userData; const a=new THREE.Vector3(); ud.a.getWorldPosition(a); const b=new THREE.Vector3(); ud.b.getWorldPosition(b); const mid=a.clone().add(b).multiplyScalar(0.5); mid.y-=0.3; const curve=new THREE.QuadraticBezierCurve3(a,mid,b); l.geometry.setFromPoints(curve.getPoints(16)); l.material.opacity=ud.base+ud.pulse*0.5; ud.pulse*=0.92;});
+  for(let i=pulses.length-1;i>=0;i--){const p=pulses[i]; p.life+=dt; const k=p.life/1.2; p.mesh.scale.setScalar(0.1+k*4*p.strength); p.mat.opacity=0.35*(1-k); if(k>=1){scene.remove(p.mesh); pulses.splice(i,1);}}
+  if(camTween){camTween.t+=dt; const k=Math.min(1,camTween.t/camTween.dur); const e=1-Math.pow(1-k,3); camera.position.lerpVectors(camTween.fromP,camTween.toP,e); controls.target.lerpVectors(camTween.fromT,camTween.toT,e); if(k>=1) camTween=null;}
+  energy*=Math.exp(-dt*0.5);
+  controls.update();
+  renderer.render(scene,camera);
+}
+animate();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight);});
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "butterfly-elva-spirit",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'No build needed - static HTML with importmap'",
+    "build": "echo 'Static site - no build'"
+  }
+}

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Butterfly — Elva Spirit</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#131313;--ink:#f3ece0;--muted:#8a8275;--gold:#d8b878;--gold2:#8c7847;--line:rgba(255,255,255,0.12);--glass:rgba(35,35,35,0.4);}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;font-weight:200;overflow:hidden;-webkit-font-smoothing:antialiased}
+  body{overscroll-behavior:none}
+  canvas{position:fixed;inset:0;z-index:0;display:block}
+  /* Loader like Elva */
+  .loader{position:fixed;inset:0;z-index:100;background:#131313;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity 1.2s ease}
+  .loader__logo{width:88px;height:88px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #fff, #d8b878 40%, #8a6a30 80%);box-shadow:0 0 60px rgba(216,184,120,0.4);animation:loaderPulse 2s infinite ease-in-out}
+  @keyframes loaderPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+  .loader__progress{margin-top:32px;font-family:'Inter';font-weight:100;font-size:64px;letter-spacing:0.12em;color:var(--ink);line-height:1}
+  .loader__loading{margin-top:12px;font-size:11px;letter-spacing:0.5em;text-transform:uppercase;color:var(--muted)}
+  /* Header like Elva */
+  .header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:20px 28px;pointer-events:none}
+  .header__logo{pointer-events:auto;width:48px;height:48px;border-radius:16px;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond';letter-spacing:0.3em;font-size:14px;color:#fff}
+  .header__buttons{pointer-events:auto;display:flex;gap:12px;align-items:center}
+  .btn{pointer-events:auto;cursor:pointer;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;padding:12px 22px;border-radius:16px;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;transition:all .4s}
+  .btn:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.06)}
+  .btn-gradient{position:relative;background:transparent;border:none;padding:0;width:180px;height:52px;display:flex;align-items:center;justify-content:center}
+  .btn-gradient svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .btn-gradient span{position:relative;z-index:1;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#fff}
+  /* Mobile fallback */
+  .mobile-content{display:none;position:fixed;inset:0;z-index:10;background:var(--bg);padding:40px 28px;flex-direction:column;justify-content:center}
+  .mobile-content .mtag{font-size:11px;letter-spacing:0.4em;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
+  .mobile-content h2{font-family:'Cormorant Garamond';font-weight:300;font-size:32px;line-height:1.15;color:var(--ink);margin-bottom:18px}
+  .mobile-content p{font-size:14px;color:var(--muted);line-height:1.6}
+  @media (max-width:900px){.desktop-content{display:none}.mobile-content{display:flex} canvas{opacity:0.3}}
+  /* Desktop scroll story */
+  .desktop-content{position:fixed;inset:0;z-index:5;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;scrollbar-width:none}
+  .desktop-content::-webkit-scrollbar{display:none}
+  .section{height:100vh;scroll-snap-align:start;position:relative;display:flex;align-items:center;padding:0 8vw;pointer-events:none}
+  .section .card{pointer-events:auto;max-width:520px}
+  .section .tag{font-size:10px;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;opacity:0;transform:translateY(20px);transition:all 0.8s ease}
+  .section .title{font-family:'Cormorant Garamond';font-weight:300;font-size:clamp(36px,5.2vw,72px);line-height:0.95;letter-spacing:-0.02em;color:var(--ink);margin-bottom:18px;opacity:0;transform:translateY(30px);transition:all 1s ease 0.1s}
+  .section .title i{font-style:italic;font-weight:300;color:var(--gold)}
+  .section .text{font-size:15px;line-height:1.7;color:var(--muted);max-width:380px;opacity:0;transform:translateY(20px);transition:all 0.8s ease 0.2s}
+  .section.active .tag,.section.active .title,.section.active .text{opacity:1;transform:translateY(0)}
+  .section .num{position:absolute;top:50%;right:8vw;transform:translateY(-50%);font-family:'Inter';font-weight:100;font-size:14vw;color:rgba(255,255,255,0.04);line-height:1;pointer-events:none}
+  /* Features like Elva */
+  .features{padding:20vh 8vw 20vh;min-height:100vh}
+  .features .tag{font-size:10px;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);margin-bottom:40px}
+  .feature{border-top:1px solid var(--line);padding:32px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;cursor:pointer;transition:all .4s}
+  .feature:hover{background:rgba(255,255,255,0.02)}
+  .feature h2{font-family:'Cormorant Garamond';font-weight:400;font-size:28px;color:var(--ink)}
+  .feature p{font-size:13px;color:var(--muted);max-width:320px;line-height:1.6}
+  .feature .arrow{width:33px;height:33px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;transition:all .3s}
+  .feature:hover .arrow{border-color:var(--gold);transform:rotate(45deg)}
+  /* Footer poetic like Elva */
+  .footer-title{padding:20vh 8vw 8vh;position:relative;min-height:100vh;border-top:1px solid var(--line)}
+  .footer-title__header{font-family:'Cormorant Garamond';font-weight:300;font-size:clamp(48px,9vw,128px);line-height:0.85;letter-spacing:-0.03em;color:var(--ink);position:relative}
+  .footer-title__topleft,.footer-title__topright,.footer-title__leftcenter,.footer-title__rightcenter,.footer-title__topcenter{position:absolute;font-family:'Inter';font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);line-height:1.8}
+  .footer-title__topleft{top:0;left:0} .footer-title__topright{top:0;right:0;text-align:right}
+  .footer-title__leftcenter{top:40%;left:0} .footer-title__rightcenter{top:40%;right:0;text-align:right}
+  .footer-title__topcenter{bottom:20%;left:50%;transform:translateX(-50%);text-align:center}
+  .footer-title__topcenter li{list-style:none}
+  .footer-bottom{padding:24px 8vw;border-top:1px solid var(--line);display:flex;gap:24px;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)}
+  .footer-bottom a{color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:8px}
+  /* Vignette */
+  .vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%)}
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:0.03;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+</style>
+</head>
+<body>
+<div class="loader" id="loader"><div class="loader__logo"></div><div class="loader__progress" id="loaderProgress">0%</div><div class="loader__loading">loading</div></div>
+<div class="vignette"></div><div class="grain"></div>
+<div class="header"><div class="header__logo">B</div><div class="header__buttons"><div class="btn" id="menuBtn">Menu</div><a class="btn-gradient" id="tryBtn" href="#"><svg width="180" height="52"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d8b878"/><stop offset="100%" stop-color="#8c7847"/></linearGradient></defs><rect x="1" y="1" rx="16" fill="none" stroke="url(#grad1)" width="178" height="50"></rect></svg><span>Enter Mechanism</span></a></div></div>
+
+<div class="mobile-content"><div class="mtag">Some celebrations need more<br/>space to unfold</div><h2>Butterfly is your personal AI director for weddings, turning timelines into emotional mechanics.</h2><p>For the full cinematic experience, please view on desktop.</p></div>
+
+<div class="desktop-content" id="scrollRoot">
+  <div class="section active" data-index="0"><div class="num">01</div><div class="card"><div class="tag">Meet Butterfly</div><div class="title">You don't<br/>control time.<br/><i>You influence<br/>what happens next.</i></div><div class="text">A living mechanical model of your wedding. No static timeline. Just cause and consequence.</div></div></div>
+  <div class="section" data-index="1"><div class="num">02</div><div class="card"><div class="tag">Problem of the majority</div><div class="title">Every wedding<br/>holds a feeling.<br/>But it gets lost<br/>in raw timelines<br/>that never move.</div><div class="text">Hours in spreadsheets. Details that never get seen. The feeling fades before it is lived.</div></div></div>
+  <div class="section" data-index="2"><div class="num">03</div><div class="card"><div class="tag">How Butterfly fixes it</div><div class="title">Butterfly picks<br/>the moment<br/>and finds what<br/>makes it matter.</div><div class="text">Drag a pearl. The mechanism breathes. Past, present, future shift. You see the cascade before it happens.</div></div></div>
+  <div class="section" data-index="3"><div class="num">04</div><div class="card"><div class="tag">It's easier than you think</div><div class="title">You click.<br/>Butterfly shows<br/>the best futures<br/>for you.</div><div class="text">No editing tools. No complexity. Just your celebration, alive.</div></div></div>
+
+  <div class="features">
+    <div class="tag">More Inside The Mechanism</div>
+    <div class="feature" data-feature="0"><div><h2>Pose Mirror — Time Mirror</h2><p>Butterfly helps you adjust timing in real time, so moments feel more natural and confident.</p></div><div class="arrow">↗</div></div>
+    <div class="feature" data-feature="1"><div><h2>Real-time Guidance</h2><p>Live help with framing, pacing, and consequence, so every shift starts stronger.</p></div><div class="arrow">↗</div></div>
+    <div class="feature" data-feature="2"><div><h2>Flow Arcs</h2><p>Flow Arcs guide your timeline along natural motion paths — every moment feels smooth, intentional, cinematic.</p></div><div class="arrow">↗</div></div>
+    <div class="feature" data-feature="3"><div><h2>Lighting Spot — Resonance Spot</h2><p>Resonance Spot helps you find the best energy in the celebration — guiding you toward moments that glow.</p></div><div class="arrow">↗</div></div>
+  </div>
+
+  <div class="footer-title">
+    <div class="footer-title__topleft"><ul><li>slow moments</li><li>unspoken vows</li><li>shared silence</li><li>calm movement</li></ul></div>
+    <div class="footer-title__topright"><ul><li>fleeting seconds</li><li>warm evenings</li><li>almost forgotten</li></ul></div>
+    <div class="footer-title__header">Stop planning.<br/>Keep feeling</div>
+    <div class="footer-title__leftcenter"><p>General inquiries:<br/>hello@stitchlab.fr</p></div>
+    <div class="footer-title__rightcenter"><p>Press:<br/>press@stitchlab.fr</p></div>
+    <div class="footer-title__topcenter"><ul><li>how it felt before it faded</li><li>just for a moment exactly like that</li><li>the feeling stayed still here</li><li>not lost — remembered</li></ul></div>
+  </div>
+  <div class="footer-bottom"><a href="#">Terms of use ↗</a><a href="#">Privacy ↗</a><span style="margin-left:auto">2026 © Butterfly — design inspired by Elva x Lazarev</span></div>
+</div>
+
+<canvas id="c"></canvas>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.05;
+renderer.setClearColor(0x131313,1);
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x131313);
+scene.fog=new THREE.FogExp2(0x131313,0.025);
+
+const camera=new THREE.PerspectiveCamera(36,innerWidth/innerHeight,0.1,100);
+camera.position.set(0,3.5,11);
+const controls=new OrbitControls(camera,canvas);
+controls.enableDamping=true; controls.dampingFactor=0.07; controls.minDistance=5; controls.maxDistance=20; controls.target.set(0,0.6,0); controls.autoRotate=true; controls.autoRotateSpeed=0.25;
+
+scene.add(new THREE.AmbientLight(0xffffff,0.5));
+const key=new THREE.DirectionalLight(0xfff2e0,2.0); key.position.set(5,8,5); scene.add(key);
+const rim=new THREE.PointLight(0xd8b878,1.2,20); rim.position.set(-4,2,-4); scene.add(rim);
+
+const M={
+  gold:new THREE.MeshStandardMaterial({color:0xd8b878,metalness:0.9,roughness:0.25}),
+  ivory:new THREE.MeshStandardMaterial({color:0xf3ece0,metalness:0.1,roughness:0.5}),
+  steel:new THREE.MeshStandardMaterial({color:0x9a958a,metalness:0.8,roughness:0.3}),
+  glass:new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0.18,roughness:0.1}),
+};
+function glowMat(c,i){return new THREE.MeshStandardMaterial({color:0x000000,emissive:new THREE.Color(c),emissiveIntensity:i});}
+
+// Jewel - same as before but centered for Elva hero
+const jewel=new THREE.Group(); jewel.position.y=0.6; scene.add(jewel);
+const base=new THREE.Mesh(new THREE.CylinderGeometry(3.2,3.4,0.18,64,1),M.ivory); base.position.y=-1.2; jewel.add(base);
+const baseRim=new THREE.Mesh(new THREE.TorusGeometry(3.2,0.05,16,64),M.gold); baseRim.rotation.x=Math.PI/2; baseRim.position.y=-1.11; jewel.add(baseRim);
+function makeRing(r,t,m){const mesh=new THREE.Mesh(new THREE.TorusGeometry(r,t,16,64),m); mesh.rotation.x=Math.PI/2; return mesh;}
+const outerRing=makeRing(2.9,0.05,M.gold); jewel.add(outerRing);
+const midRing=makeRing(2.35,0.035,M.steel); jewel.add(midRing);
+const innerRing=makeRing(1.65,0.04,M.gold); jewel.add(innerRing);
+const coreRing=makeRing(0.95,0.03,M.steel); jewel.add(coreRing);
+function makeGear(r,teeth,thick,mat){const g=new THREE.Group(); const body=new THREE.Mesh(new THREE.CylinderGeometry(r,r,thick,24),mat); body.rotation.x=Math.PI/2; g.add(body); for(let i=0;i<teeth;i++){const a=(i/teeth)*Math.PI*2; const t=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.02,thick*1.1),mat); t.position.set(Math.cos(a)*(r+0.03),Math.sin(a)*(r+0.03),0); t.rotation.z=a; g.add(t);} return g;}
+const gear1=makeGear(0.5,18,0.05,M.gold); gear1.position.set(1.9,0.35,0); jewel.add(gear1);
+const gear2=makeGear(0.32,12,0.05,M.steel); gear2.position.set(2.5,0.35,0); jewel.add(gear2);
+
+// Butterfly blob like Elva
+function makeWing(){const s=new THREE.Shape(); s.moveTo(0.02,0); s.bezierCurveTo(0.2,0.4,0.7,0.8,1.2,0.8); s.bezierCurveTo(1.6,0.8,1.7,0.4,1.2,0.15); s.bezierCurveTo(1.4,-0.06,1.3,-0.6,0.9,-0.65); s.bezierCurveTo(0.5,-0.7,0.2,-0.3,0,-0.05); s.closePath(); const geo=new THREE.ExtrudeGeometry(s,{depth:0.02,bevelEnabled:false}); geo.rotateX(-Math.PI/2); return geo;}
+const butterfly={root:new THREE.Group(),spin:new THREE.Group(),wings:[],phase:0};
+{
+  butterfly.root.add(butterfly.spin); butterfly.root.position.set(0,0.9,0); butterfly.root.rotation.x=-0.3; butterfly.root.scale.setScalar(0.6); jewel.add(butterfly.root);
+  const thorax=new THREE.Mesh(new THREE.SphereGeometry(0.08,12,10),M.ivory); butterfly.spin.add(thorax);
+  const heart=new THREE.Mesh(new THREE.SphereGeometry(0.05,10,8),glowMat(0xffd9a0,2.0)); butterfly.spin.add(heart); butterfly.heart=heart.material;
+  const wingGeo=makeWing();
+  for(const s of [1,-1]){const pivot=new THREE.Group(); pivot.position.set(0,0.02,0); pivot.scale.x=s; const wing=new THREE.Mesh(wingGeo,new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0.6})); pivot.add(wing); butterfly.spin.add(pivot); butterfly.wings.push({pivot,side:s});}
+}
+
+// Moments as glass pearls
+const COLORS={confirmed:0xe9c47a,expected:0xcfd9e8,proposed:0x8fb8d8,uncertain:0xd8a36a,waiting:0x9a9387,conflict:0xd97a7a};
+const moments=[
+  {id:'arrival',name:'Arrival',time:14,status:'confirmed'},{id:'ceremony',name:'Ceremony',time:16,status:'confirmed'},{id:'cocktail',name:'Cocktail',time:17,status:'confirmed'},{id:'photos',name:'Photos',time:17.5,status:'proposed'},{id:'dinner',name:'Dinner',time:19.5,status:'expected'},{id:'speeches',name:'Speeches',time:21,status:'expected'},{id:'firstdance',name:'First Dance',time:21.5,status:'proposed'},{id:'party',name:'Party',time:22,status:'confirmed'},{id:'departure',name:'Departure',time:23.5,status:'waiting'},
+];
+const TIME_MIN=13,TIME_MAX=25,ORBIT=2.35;
+function timeToAngle(t){return (t-TIME_MIN)/(TIME_MAX-TIME_MIN)*Math.PI*2 - Math.PI/2;}
+const pearlGroup=new THREE.Group(); jewel.add(pearlGroup);
+const pearls={};
+moments.forEach(m=>{
+  const g=new THREE.Group();
+  const pearl=new THREE.Mesh(new THREE.SphereGeometry(0.11,20,16), new THREE.MeshStandardMaterial({color:0xfaf6ee,emissive:COLORS[m.status],emissiveIntensity:0.5}));
+  g.add(pearl);
+  const halo=new THREE.Mesh(new THREE.RingGeometry(0.18,0.21,24), new THREE.MeshBasicMaterial({color:COLORS[m.status],transparent:true,opacity:0.35,side:THREE.DoubleSide})); halo.rotation.x=Math.PI/2; g.add(halo);
+  g.userData={pearl,halo,phase:Math.random()*6}; pearlGroup.add(g); pearls[m.id]=g;
+});
+
+// Pulses
+const pulseGeo=new THREE.SphereGeometry(1,16,12);
+const pulses=[];
+function spawnPulse(pos,s){
+  const mat=new THREE.MeshBasicMaterial({color:0xd8b878,transparent:true,opacity:0.3});
+  const mesh=new THREE.Mesh(pulseGeo,mat); mesh.position.copy(pos); mesh.scale.setScalar(0.01); scene.add(mesh);
+  pulses.push({mesh,mat,life:0,s});
+}
+
+// Loader
+let progress=0; const loader=document.getElementById('loader'), progEl=document.getElementById('loaderProgress');
+const loaderInterval=setInterval(()=>{progress+=Math.random()*18; if(progress>=100){progress=100; clearInterval(loaderInterval); progEl.textContent='100%'; setTimeout(()=>{loader.style.opacity='0'; setTimeout(()=>loader.style.display='none',1200);},600);} progEl.textContent=Math.floor(progress).toString().padStart(3,'0')+'%';},120);
+
+// Scroll story
+const sections=document.querySelectorAll('.section');
+const scrollRoot=document.getElementById('scrollRoot');
+let currentIndex=0;
+scrollRoot.addEventListener('scroll',()=>{
+  const st=scrollRoot.scrollTop;
+  const h=innerHeight;
+  const idx=Math.round(st/h);
+  if(idx!==currentIndex){
+    currentIndex=idx;
+    sections.forEach((s,i)=>s.classList.toggle('active',i===idx));
+    // trigger butterfly energy
+    const p=new THREE.Vector3(0,0.9,0); jewel.localToWorld(p); spawnPulse(p,0.8+idx*0.2);
+    // rotate jewel to match story
+    const targetY=idx*0.3;
+    // camera travel
+    const cams=[ [0,3.5,11], [2,4,10], [-2,3,10], [0,6,8] ];
+    const c=cams[Math.min(idx,cams.length-1)];
+    // simple tween
+    const start=performance.now();
+    const from= camera.position.clone();
+    const to=new THREE.Vector3(c[0],c[1],c[2]);
+    function tween(){
+      const k=Math.min(1,(performance.now()-start)/1200);
+      const e=1-Math.pow(1-k,3);
+      camera.position.lerpVectors(from,to,e);
+      if(k<1) requestAnimationFrame(tween);
+    }
+    tween();
+  }
+});
+
+// Click try
+document.getElementById('tryBtn').addEventListener('click',e=>{e.preventDefault(); scrollRoot.scrollTo({top:innerHeight,behavior:'smooth'});});
+
+// Features hover = pulse
+document.querySelectorAll('.feature').forEach(f=>{
+  f.addEventListener('mouseenter',()=>{
+    const p=new THREE.Vector3(0,0.9,0); jewel.localToWorld(p); spawnPulse(p,0.6);
+  });
+});
+
+const clock=new THREE.Clock();
+let time=0, energy=0;
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=clock.getDelta(); time+=dt;
+  energy*=Math.exp(-dt*0.6);
+  // auto if not scrolling
+  if(scrollRoot.scrollTop<10){jewel.rotation.y+=dt*0.05;}
+  outerRing.rotation.z+=dt*0.04; midRing.rotation.z-=dt*0.06; innerRing.rotation.z+=dt*0.1;
+  gear1.rotation.z+=dt*0.4; gear2.rotation.z-=dt*0.6;
+  butterfly.phase+=dt*(3.5+energy*2); const flap=Math.sin(butterfly.phase); const ang=0.12+flap*0.45; for(const w of butterfly.wings) w.pivot.rotation.z=w.side*ang; butterfly.spin.rotation.y+=dt*0.15; if(butterfly.heart) butterfly.heart.emissiveIntensity=1.5+Math.abs(flap)*1.2+energy;
+  moments.forEach(m=>{const g=pearls[m.id]; const a=timeToAngle(m.time); const jx=Math.sin(time*1.2+g.userData.phase)*0.02; const jy=Math.cos(time*1.1+g.userData.phase)*0.02; g.position.set(Math.cos(a)*ORBIT+jx, jy+0.05, Math.sin(a)*ORBIT);});
+  for(let i=pulses.length-1;i>=0;i--){const p=pulses[i]; p.life+=dt; const k=p.life/1.2; p.mesh.scale.setScalar(0.1+k*5*p.s); p.mat.opacity=0.3*(1-k); if(k>=1){scene.remove(p.mesh); pulses.splice(i,1);}}
+  controls.update();
+  renderer.render(scene,camera);
+}
+animate();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight);});
+</script>
+</body>
+</html>
