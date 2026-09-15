@@ -2,105 +2,149 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Butterfly — Elva Spirit</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Butterfly — byaime.fr typo + iPhones</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#131313;--ink:#f3ece0;--muted:#8a8275;--gold:#d8b878;--gold2:#8c7847;--line:rgba(255,255,255,0.12);--glass:rgba(35,35,35,0.4);}
+  :root{
+    --bg:#0a0a0c; --bg2:#131313; --ink:#f5f3ef; --muted:#9a9590; --muted2:#6b6762;
+    --gold:#d8b878; --gold2:#b89a5a; --line:rgba(255,255,255,0.08); --line2:rgba(216,184,120,0.18);
+    --glass:rgba(22,22,24,0.72); --card:rgba(20,20,22,0.9);
+  }
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;font-weight:200;overflow:hidden;-webkit-font-smoothing:antialiased}
+  html,body{width:100%;background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;font-weight:300;overflow-x:hidden;-webkit-font-smoothing:antialiased}
   body{overscroll-behavior:none}
-  canvas{position:fixed;inset:0;z-index:0;display:block}
-  /* Loader like Elva */
-  .loader{position:fixed;inset:0;z-index:100;background:#131313;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity 1.2s ease}
-  .loader__logo{width:88px;height:88px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #fff, #d8b878 40%, #8a6a30 80%);box-shadow:0 0 60px rgba(216,184,120,0.4);animation:loaderPulse 2s infinite ease-in-out}
-  @keyframes loaderPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-  .loader__progress{margin-top:32px;font-family:'Inter';font-weight:100;font-size:64px;letter-spacing:0.12em;color:var(--ink);line-height:1}
-  .loader__loading{margin-top:12px;font-size:11px;letter-spacing:0.5em;text-transform:uppercase;color:var(--muted)}
-  /* Header like Elva */
-  .header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:20px 28px;pointer-events:none}
-  .header__logo{pointer-events:auto;width:48px;height:48px;border-radius:16px;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond';letter-spacing:0.3em;font-size:14px;color:#fff}
-  .header__buttons{pointer-events:auto;display:flex;gap:12px;align-items:center}
-  .btn{pointer-events:auto;cursor:pointer;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;padding:12px 22px;border-radius:16px;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;transition:all .4s}
-  .btn:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.06)}
-  .btn-gradient{position:relative;background:transparent;border:none;padding:0;width:180px;height:52px;display:flex;align-items:center;justify-content:center}
-  .btn-gradient svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-  .btn-gradient span{position:relative;z-index:1;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#fff}
-  /* Mobile fallback */
-  .mobile-content{display:none;position:fixed;inset:0;z-index:10;background:var(--bg);padding:40px 28px;flex-direction:column;justify-content:center}
-  .mobile-content .mtag{font-size:11px;letter-spacing:0.4em;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
-  .mobile-content h2{font-family:'Cormorant Garamond';font-weight:300;font-size:32px;line-height:1.15;color:var(--ink);margin-bottom:18px}
-  .mobile-content p{font-size:14px;color:var(--muted);line-height:1.6}
-  @media (max-width:900px){.desktop-content{display:none}.mobile-content{display:flex} canvas{opacity:0.3}}
-  /* Desktop scroll story */
-  .desktop-content{position:fixed;inset:0;z-index:5;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;scrollbar-width:none}
-  .desktop-content::-webkit-scrollbar{display:none}
-  .section{height:100vh;scroll-snap-align:start;position:relative;display:flex;align-items:center;padding:0 8vw;pointer-events:none}
-  .section .card{pointer-events:auto;max-width:520px}
-  .section .tag{font-size:10px;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;opacity:0;transform:translateY(20px);transition:all 0.8s ease}
-  .section .title{font-family:'Cormorant Garamond';font-weight:300;font-size:clamp(36px,5.2vw,72px);line-height:0.95;letter-spacing:-0.02em;color:var(--ink);margin-bottom:18px;opacity:0;transform:translateY(30px);transition:all 1s ease 0.1s}
-  .section .title i{font-style:italic;font-weight:300;color:var(--gold)}
-  .section .text{font-size:15px;line-height:1.7;color:var(--muted);max-width:380px;opacity:0;transform:translateY(20px);transition:all 0.8s ease 0.2s}
-  .section.active .tag,.section.active .title,.section.active .text{opacity:1;transform:translateY(0)}
-  .section .num{position:absolute;top:50%;right:8vw;transform:translateY(-50%);font-family:'Inter';font-weight:100;font-size:14vw;color:rgba(255,255,255,0.04);line-height:1;pointer-events:none}
-  /* Features like Elva */
-  .features{padding:20vh 8vw 20vh;min-height:100vh}
-  .features .tag{font-size:10px;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);margin-bottom:40px}
-  .feature{border-top:1px solid var(--line);padding:32px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;cursor:pointer;transition:all .4s}
+  canvas{position:fixed;inset:0;z-index:0;opacity:0.55;pointer-events:none}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%)}
+  .grain{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0.025;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+  /* Loader byaime style */
+  .loader{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .9s ease}
+  .loader .logo{width:64px;height:64px;border-radius:18px;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;letter-spacing:0.1em}
+  .loader .bar{margin-top:28px;width:120px;height:1px;background:var(--line);position:relative;overflow:hidden}
+  .loader .bar-fill{position:absolute;left:0;top:0;height:100%;width:0%;background:var(--gold);transition:width .2s linear}
+  .loader .pct{margin-top:12px;font-family:'Inter';font-weight:300;font-size:11px;letter-spacing:0.4em;color:var(--muted);text-transform:uppercase}
+
+  /* Header byaime */
+  .header{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:18px 28px;background:linear-gradient(to bottom, rgba(10,10,12,0.9), transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .header .brand{font-weight:600;font-size:15px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink)}
+  .header .brand span{font-weight:300;color:var(--gold)}
+  .header .nav{display:flex;gap:10px}
+  .pill{border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(16px);color:var(--ink);padding:10px 18px;border-radius:999px;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;cursor:pointer;transition:all .3s;font-family:'Plus Jakarta Sans';font-weight:500}
+  .pill:hover{border-color:var(--line2);color:var(--gold)} .pill.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .pill.gold{border-color:var(--gold);color:var(--gold)} .pill.gold:hover{background:var(--gold);color:var(--bg)}
+
+  /* Layout */
+  .main{position:relative;z-index:10;padding-top:88px}
+  .section{position:relative;min-height:100vh;display:flex;align-items:center;padding:8vh 6vw;gap:6vw;border-bottom:1px solid var(--line)}
+  .section .left{flex:1;max-width:560px}
+  .section .right{flex:1;display:flex;justify-content:center;align-items:center;position:sticky;top:18vh}
+  .section .kicker{font-size:10px;letter-spacing:0.45em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;font-weight:600}
+  .section .title{font-family:'Plus Jakarta Sans';font-weight:300;font-size:clamp(36px,4.8vw,64px);line-height:0.95;letter-spacing:-0.03em;color:var(--ink);margin-bottom:18px}
+  .section .title b{font-weight:600}
+  .section .title i{font-style:normal;font-weight:300;color:var(--gold)}
+  .section .text{font-family:'Inter';font-weight:300;font-size:15px;line-height:1.75;color:var(--muted);max-width:420px}
+  .section .meta{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap}
+  .section .meta span{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted2);border:1px solid var(--line);padding:6px 12px;border-radius:999px}
+
+  /* iPhone */
+  .iphone{position:relative;width:min(320px,78vw);height:640px;background:#000;border-radius:48px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 20px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06) inset;padding:10px;overflow:hidden;transform:rotate(-1.5deg);transition:transform .6s ease}
+  .iphone:hover{transform:rotate(0deg) scale(1.02)}
+  .iphone .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:96px;height:24px;background:#000;border-radius:0 0 14px 14px;z-index:2}
+  .iphone .screen{width:100%;height:100%;background:#0f0f0f;border-radius:40px;overflow:hidden;position:relative}
+  .iphone .screen iframe{width:100%;height:100%;border:none;background:#0f0f0f}
+  .iphone .screen .fallback{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;background:radial-gradient(circle at 30% 20%, rgba(216,184,120,0.15), transparent 50%), #0f0f0f}
+  .iphone .screen .fallback h3{font-size:18px;font-weight:600;margin-bottom:8px;color:var(--ink)}
+  .iphone .screen .fallback p{font-size:12px;color:var(--muted);line-height:1.6}
+  .iphone .screen .fallback .link{margin-top:14px;font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line2);padding:8px 14px;border-radius:999px}
+
+  /* Multiple iPhones stack for verticality */
+  .iphone-stack{position:relative;width:min(340px,82vw);height:720px}
+  .iphone-stack .iphone{position:absolute;left:0;top:0}
+  .iphone-stack .iphone:nth-child(2){transform:translate(18px,36px) rotate(2deg) scale(0.96);z-index:1;opacity:0.9}
+  .iphone-stack .iphone:nth-child(3){transform:translate(36px,72px) rotate(-2.5deg) scale(0.92);z-index:0;opacity:0.75}
+
+  /* Features */
+  .features{padding:12vh 6vw;border-top:1px solid var(--line);background:var(--bg2)}
+  .features .head{max-width:560px;margin-bottom:60px}
+  .features .head .kicker{font-size:10px;letter-spacing:0.45em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;font-weight:600}
+  .features .head h2{font-size:clamp(28px,3.5vw,44px);font-weight:300;line-height:1.05;letter-spacing:-0.02em}
+  .feature{border-top:1px solid var(--line);padding:28px 0;display:flex;justify-content:space-between;gap:20px;cursor:pointer;transition:background .3s}
   .feature:hover{background:rgba(255,255,255,0.02)}
-  .feature h2{font-family:'Cormorant Garamond';font-weight:400;font-size:28px;color:var(--ink)}
-  .feature p{font-size:13px;color:var(--muted);max-width:320px;line-height:1.6}
-  .feature .arrow{width:33px;height:33px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;transition:all .3s}
+  .feature h3{font-size:18px;font-weight:500;color:var(--ink)} .feature p{font-size:13px;color:var(--muted);max-width:360px;line-height:1.6}
+  .feature .arrow{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;transition:all .3s}
   .feature:hover .arrow{border-color:var(--gold);transform:rotate(45deg)}
-  /* Footer poetic like Elva */
-  .footer-title{padding:20vh 8vw 8vh;position:relative;min-height:100vh;border-top:1px solid var(--line)}
-  .footer-title__header{font-family:'Cormorant Garamond';font-weight:300;font-size:clamp(48px,9vw,128px);line-height:0.85;letter-spacing:-0.03em;color:var(--ink);position:relative}
-  .footer-title__topleft,.footer-title__topright,.footer-title__leftcenter,.footer-title__rightcenter,.footer-title__topcenter{position:absolute;font-family:'Inter';font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);line-height:1.8}
-  .footer-title__topleft{top:0;left:0} .footer-title__topright{top:0;right:0;text-align:right}
-  .footer-title__leftcenter{top:40%;left:0} .footer-title__rightcenter{top:40%;right:0;text-align:right}
-  .footer-title__topcenter{bottom:20%;left:50%;transform:translateX(-50%);text-align:center}
-  .footer-title__topcenter li{list-style:none}
-  .footer-bottom{padding:24px 8vw;border-top:1px solid var(--line);display:flex;gap:24px;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)}
-  .footer-bottom a{color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:8px}
-  /* Vignette */
-  .vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%)}
-  .grain{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:0.03;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+  /* Footer poetic */
+  .footer{padding:16vh 6vw 6vh;border-top:1px solid var(--line);position:relative;background:var(--bg)}
+  .footer .big{font-family:'Plus Jakarta Sans';font-weight:300;font-size:clamp(48px,9vw,128px);line-height:0.85;letter-spacing:-0.04em;color:var(--ink)}
+  .footer .big i{font-style:normal;color:var(--gold)}
+  .footer .poetic{position:absolute;top:6vh;left:6vw;right:6vw;display:flex;justify-content:space-between;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted2);line-height:1.9}
+  .footer .bottom{margin-top:12vh;padding-top:24px;border-top:1px solid var(--line);display:flex;gap:20px;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted2)}
+  .footer .bottom a{color:var(--muted2);text-decoration:none}
+
+  @media (max-width:900px){
+    .section{flex-direction:column;min-height:auto;padding:10vh 6vw;gap:8vh}
+    .section .right{position:relative;top:auto;order:-1}
+    .iphone{width:300px;height:600px}
+    .footer .poetic{position:relative;top:auto;left:auto;right:auto;flex-direction:column;gap:12px;margin-bottom:40px}
+  }
 </style>
 </head>
 <body>
-<div class="loader" id="loader"><div class="loader__logo"></div><div class="loader__progress" id="loaderProgress">0%</div><div class="loader__loading">loading</div></div>
+<div class="loader" id="loader"><div class="logo">B</div><div class="bar"><div class="bar-fill" id="barFill"></div></div><div class="pct" id="pct">0%</div></div>
 <div class="vignette"></div><div class="grain"></div>
-<div class="header"><div class="header__logo">B</div><div class="header__buttons"><div class="btn" id="menuBtn">Menu</div><a class="btn-gradient" id="tryBtn" href="#"><svg width="180" height="52"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d8b878"/><stop offset="100%" stop-color="#8c7847"/></linearGradient></defs><rect x="1" y="1" rx="16" fill="none" stroke="url(#grad1)" width="178" height="50"></rect></svg><span>Enter Mechanism</span></a></div></div>
+<canvas id="c"></canvas>
 
-<div class="mobile-content"><div class="mtag">Some celebrations need more<br/>space to unfold</div><h2>Butterfly is your personal AI director for weddings, turning timelines into emotional mechanics.</h2><p>For the full cinematic experience, please view on desktop.</p></div>
+<div class="header"><div class="brand">BUTTERFLY <span>EFFECT</span></div><div class="nav"><button class="pill" id="liveBtn">LIVE</button><button class="pill gold" id="enterBtn2">Enter</button></div></div>
 
-<div class="desktop-content" id="scrollRoot">
-  <div class="section active" data-index="0"><div class="num">01</div><div class="card"><div class="tag">Meet Butterfly</div><div class="title">You don't<br/>control time.<br/><i>You influence<br/>what happens next.</i></div><div class="text">A living mechanical model of your wedding. No static timeline. Just cause and consequence.</div></div></div>
-  <div class="section" data-index="1"><div class="num">02</div><div class="card"><div class="tag">Problem of the majority</div><div class="title">Every wedding<br/>holds a feeling.<br/>But it gets lost<br/>in raw timelines<br/>that never move.</div><div class="text">Hours in spreadsheets. Details that never get seen. The feeling fades before it is lived.</div></div></div>
-  <div class="section" data-index="2"><div class="num">03</div><div class="card"><div class="tag">How Butterfly fixes it</div><div class="title">Butterfly picks<br/>the moment<br/>and finds what<br/>makes it matter.</div><div class="text">Drag a pearl. The mechanism breathes. Past, present, future shift. You see the cascade before it happens.</div></div></div>
-  <div class="section" data-index="3"><div class="num">04</div><div class="card"><div class="tag">It's easier than you think</div><div class="title">You click.<br/>Butterfly shows<br/>the best futures<br/>for you.</div><div class="text">No editing tools. No complexity. Just your celebration, alive.</div></div></div>
+<div class="main" id="main">
+  <!-- 01 -->
+  <div class="section" data-site="elva">
+    <div class="left"><div class="kicker">Esprit Elva Labs — 01</div><div class="title">You don't<br/><b>control time.</b><br/>You <i>influence</i><br/>what happens next.</div><div class="text">Inspiré par elvalabs.ai — une persona WebGL, pas une UI. Le temps devient matière vivante. Plus de timeline figée.</div><div class="meta"><span>WebGL Persona</span><span>Scroll Cinematic</span><span>Glass 20px blur</span></div></div>
+    <div class="right"><div class="iphone"><div class="notch"></div><div class="screen"><div class="fallback"><h3>elvalabs.ai</h3><p>Webby 2026 Best Visual UI in AI — blob verre 30 états, scroll cinématique, typo XXThin</p><a class="link" href="https://elvalabs.ai/" target="_blank">Ouvrir ↗</a></div></div></div></div>
+  </div>
+  <!-- 02 dispoo -->
+  <div class="section" data-site="dispoo">
+    <div class="left"><div class="kicker">byaime.fr ecosystem — 02</div><div class="title">Votre mariage,<br/><b>tout simplement.</b><br/><i>Une date, un lieu.</i></div><div class="text">Comme byaime.fr : Plus Jakarta Sans 300/500, espace privé, mots simples. Sur fond sombre #0a0a0c pour garder le luxe.</div><div class="meta"><span>Plus Jakarta Sans</span><span>Fond sombre</span><span>byaime.fr</span></div></div>
+    <div class="right"><div class="iphone"><div class="notch"></div><div class="screen"><iframe src="https://dispoo.app" loading="lazy" onerror="this.style.display='none'"></iframe><div class="fallback" style="position:absolute;inset:0"><h3>dispoo.app</h3><p>AIME — Organisez votre mariage simplement. Bureau, Jour J, Cartes musicales.</p><a class="link" href="https://dispoo.app" target="_blank">Ouvrir ↗</a></div></div></div></div>
+  </div>
+  <!-- 03 timeline theater -->
+  <div class="section" data-site="timeline">
+    <div class="left"><div class="kicker">Timeline Theater — 03</div><div class="title">Le Grand Jour<br/><b>timeline immersive</b><br/><i>de votre mariage.</i></div><div class="text">Décrivez votre mariage, nous en faisons une timeline vivante. Intégré en iPhone pour montrer la verticalité du récit.</div><div class="meta"><span>Immersive Timeline</span><span>Lovable</span></div></div>
+    <div class="right"><div class="iphone-stack"><div class="iphone"><div class="notch"></div><div class="screen"><iframe src="https://timeline-theater.lovable.app/" loading="lazy"></iframe></div></div><div class="iphone"><div class="notch"></div><div class="screen"><div class="fallback"><h3>Timeline Theater</h3><p>Version immersive</p></div></div></div></div></div>
+  </div>
+  <!-- 04 tempo narrative -->
+  <div class="section" data-site="tempo">
+    <div class="left"><div class="kicker">Tempo Narrative — 04</div><div class="title">Allagi<br/><b>la bande-son</b><br/><i>de votre mariage.</i></div><div class="text">Composer, placer dans le temps, partager. Une courbe d'énergie qui raconte la soirée — comme notre courbe de résonance.</div><div class="meta"><span>Bande-son</span><span>Courbe d'énergie</span></div></div>
+    <div class="right"><div class="iphone"><div class="notch"></div><div class="screen"><iframe src="https://tempo-narrative.lovable.app/" loading="lazy"></iframe><div class="fallback" style="position:absolute;inset:0;pointer-events:none;opacity:0.9"><h3>tempo-narrative</h3><p>Allagi — la bande-son d'un événement</p></div></div></div></div>
+  </div>
+  <!-- 05 bug buddy -->
+  <div class="section" data-site="bug">
+    <div class="left"><div class="kicker">Bug Buddy — 05</div><div class="title">Less process.<br/><b>More progress.</b><br/><i>Triage en temps réel.</i></div><div class="text">Inspiration pour le mode LIVE de Butterfly : priority triage, 4 niveaux, analytics temps réel. Même exigence de vitesse.</div><div class="meta"><span>Triage</span><span>Real-time</span></div></div>
+    <div class="right"><div class="iphone"><div class="notch"></div><div class="screen"><iframe src="https://bug-buddy-central-97.lovable.app/" loading="lazy"></iframe></div></div></div>
+  </div>
+  <!-- 06 byaime -->
+  <div class="section" data-site="byaime">
+    <div class="left"><div class="kicker">byaime.fr — 06 / Final</div><div class="title">Your whole wedding,<br/><b>in one private space.</b><br/><i>Plan with peace of mind.</i></div><div class="text">Typo Plus Jakarta Sans comme byaime.fr, mais sur fond sombre. Private, Free, Simple, Available everywhere — même promesse que Butterfly.</div><div class="meta"><span>Private Space</span><span>byaime.fr</span><span>Peace of mind</span></div></div>
+    <div class="right"><div class="iphone"><div class="notch"></div><div class="screen"><iframe src="https://www.byaime.fr/" loading="lazy"></iframe></div></div></div>
+  </div>
 
   <div class="features">
-    <div class="tag">More Inside The Mechanism</div>
-    <div class="feature" data-feature="0"><div><h2>Pose Mirror — Time Mirror</h2><p>Butterfly helps you adjust timing in real time, so moments feel more natural and confident.</p></div><div class="arrow">↗</div></div>
-    <div class="feature" data-feature="1"><div><h2>Real-time Guidance</h2><p>Live help with framing, pacing, and consequence, so every shift starts stronger.</p></div><div class="arrow">↗</div></div>
-    <div class="feature" data-feature="2"><div><h2>Flow Arcs</h2><p>Flow Arcs guide your timeline along natural motion paths — every moment feels smooth, intentional, cinematic.</p></div><div class="arrow">↗</div></div>
-    <div class="feature" data-feature="3"><div><h2>Lighting Spot — Resonance Spot</h2><p>Resonance Spot helps you find the best energy in the celebration — guiding you toward moments that glow.</p></div><div class="arrow">↗</div></div>
+    <div class="head"><div class="kicker">More Inside The Mechanism</div><h2>Horlogerie visible +<br/>esprit Elva + typo byaime</h2></div>
+    <div class="feature"><div><h3>Scroll fixé — plus de blocage au 4</h3><p>Passage de mandatory à proximity + scroll libre après section 4. Tu peux descendre jusqu'au footer maintenant.</p></div><div class="arrow">↗</div></div>
+    <div class="feature"><div><h3>Typo byaime.fr</h3><p>Plus Jakarta Sans 300/500/600 + Inter 300. Titres 64px weight 300, bolds 600, italique or. Sur fond #0a0a0c sombre.</p></div><div class="arrow">↗</div></div>
+    <div class="feature"><div><h3>iPhones verticaux</h3><p>Chaque site dans un iPhone le long de la verticalité, comme Elva avec ses vidéos. Stack de 2-3 iPhones pour la profondeur.</p></div><div class="arrow">↗</div></div>
   </div>
 
-  <div class="footer-title">
-    <div class="footer-title__topleft"><ul><li>slow moments</li><li>unspoken vows</li><li>shared silence</li><li>calm movement</li></ul></div>
-    <div class="footer-title__topright"><ul><li>fleeting seconds</li><li>warm evenings</li><li>almost forgotten</li></ul></div>
-    <div class="footer-title__header">Stop planning.<br/>Keep feeling</div>
-    <div class="footer-title__leftcenter"><p>General inquiries:<br/><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="09616c656566497a7d607d6a6165686b276f7b">[email&#160;protected]</a></p></div>
-    <div class="footer-title__rightcenter"><p>Press:<br/><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5727253224241724233e23343f3b3635793125">[email&#160;protected]</a></p></div>
-    <div class="footer-title__topcenter"><ul><li>how it felt before it faded</li><li>just for a moment exactly like that</li><li>the feeling stayed still here</li><li>not lost — remembered</li></ul></div>
+  <div class="footer">
+    <div class="poetic"><div>slow moments<br/>unspoken vows<br/>shared silence<br/>calm movement</div><div>fleeting seconds<br/>warm evenings<br/>almost forgotten</div></div>
+    <div class="big">Stop planning.<br/><i>Keep feeling</i></div>
+    <div class="bottom"><a href="#">Terms ↗</a><a href="#">Privacy ↗</a><span style="margin-left:auto">2026 © Butterfly — byaime typo + Elva spirit + 5 iPhones</span></div>
   </div>
-  <div class="footer-bottom"><a href="#">Terms of use ↗</a><a href="#">Privacy ↗</a><span style="margin-left:auto">2026 © Butterfly — design inspired by Elva x Lazarev</span></div>
 </div>
 
-<canvas id="c"></canvas>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -109,145 +153,50 @@ const canvas=document.getElementById('c');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.setSize(innerWidth,innerHeight);
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.05;
-renderer.setClearColor(0x131313,1);
-
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x131313);
-scene.fog=new THREE.FogExp2(0x131313,0.025);
-
-const camera=new THREE.PerspectiveCamera(36,innerWidth/innerHeight,0.1,100);
-camera.position.set(0,3.5,11);
-const controls=new OrbitControls(camera,canvas);
-controls.enableDamping=true; controls.dampingFactor=0.07; controls.minDistance=5; controls.maxDistance=20; controls.target.set(0,0.6,0); controls.autoRotate=true; controls.autoRotateSpeed=0.25;
-
+renderer.setClearColor(0x0a0a0c,1);
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x0a0a0c);
+const camera=new THREE.PerspectiveCamera(34,innerWidth/innerHeight,0.1,100); camera.position.set(0,3.8,10);
+const controls=new OrbitControls(camera,canvas); controls.enableDamping=true; controls.dampingFactor=0.06; controls.autoRotate=true; controls.autoRotateSpeed=0.2; controls.target.set(0,0.6,0);
 scene.add(new THREE.AmbientLight(0xffffff,0.5));
-const key=new THREE.DirectionalLight(0xfff2e0,2.0); key.position.set(5,8,5); scene.add(key);
-const rim=new THREE.PointLight(0xd8b878,1.2,20); rim.position.set(-4,2,-4); scene.add(rim);
+const key=new THREE.DirectionalLight(0xfff2e0,1.8); key.position.set(5,8,5); scene.add(key);
+const rim=new THREE.PointLight(0xd8b878,0.8,20); rim.position.set(-3,2,-3); scene.add(rim);
 
-const M={
-  gold:new THREE.MeshStandardMaterial({color:0xd8b878,metalness:0.9,roughness:0.25}),
-  ivory:new THREE.MeshStandardMaterial({color:0xf3ece0,metalness:0.1,roughness:0.5}),
-  steel:new THREE.MeshStandardMaterial({color:0x9a958a,metalness:0.8,roughness:0.3}),
-  glass:new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0.18,roughness:0.1}),
-};
-function glowMat(c,i){return new THREE.MeshStandardMaterial({color:0x000000,emissive:new THREE.Color(c),emissiveIntensity:i});}
-
-// Jewel - same as before but centered for Elva hero
-const jewel=new THREE.Group(); jewel.position.y=0.6; scene.add(jewel);
-const base=new THREE.Mesh(new THREE.CylinderGeometry(3.2,3.4,0.18,64,1),M.ivory); base.position.y=-1.2; jewel.add(base);
-const baseRim=new THREE.Mesh(new THREE.TorusGeometry(3.2,0.05,16,64),M.gold); baseRim.rotation.x=Math.PI/2; baseRim.position.y=-1.11; jewel.add(baseRim);
+const M={gold:new THREE.MeshStandardMaterial({color:0xd8b878,metalness:0.85,roughness:0.3}),ivory:new THREE.MeshStandardMaterial({color:0xf3ece0,metalness:0.1,roughness:0.6}),steel:new THREE.MeshStandardMaterial({color:0x9a958a,metalness:0.7,roughness:0.35}),glass:new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0.15})};
 function makeRing(r,t,m){const mesh=new THREE.Mesh(new THREE.TorusGeometry(r,t,16,64),m); mesh.rotation.x=Math.PI/2; return mesh;}
-const outerRing=makeRing(2.9,0.05,M.gold); jewel.add(outerRing);
-const midRing=makeRing(2.35,0.035,M.steel); jewel.add(midRing);
-const innerRing=makeRing(1.65,0.04,M.gold); jewel.add(innerRing);
-const coreRing=makeRing(0.95,0.03,M.steel); jewel.add(coreRing);
-function makeGear(r,teeth,thick,mat){const g=new THREE.Group(); const body=new THREE.Mesh(new THREE.CylinderGeometry(r,r,thick,24),mat); body.rotation.x=Math.PI/2; g.add(body); for(let i=0;i<teeth;i++){const a=(i/teeth)*Math.PI*2; const t=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.02,thick*1.1),mat); t.position.set(Math.cos(a)*(r+0.03),Math.sin(a)*(r+0.03),0); t.rotation.z=a; g.add(t);} return g;}
-const gear1=makeGear(0.5,18,0.05,M.gold); gear1.position.set(1.9,0.35,0); jewel.add(gear1);
-const gear2=makeGear(0.32,12,0.05,M.steel); gear2.position.set(2.5,0.35,0); jewel.add(gear2);
-
-// Butterfly blob like Elva
-function makeWing(){const s=new THREE.Shape(); s.moveTo(0.02,0); s.bezierCurveTo(0.2,0.4,0.7,0.8,1.2,0.8); s.bezierCurveTo(1.6,0.8,1.7,0.4,1.2,0.15); s.bezierCurveTo(1.4,-0.06,1.3,-0.6,0.9,-0.65); s.bezierCurveTo(0.5,-0.7,0.2,-0.3,0,-0.05); s.closePath(); const geo=new THREE.ExtrudeGeometry(s,{depth:0.02,bevelEnabled:false}); geo.rotateX(-Math.PI/2); return geo;}
-const butterfly={root:new THREE.Group(),spin:new THREE.Group(),wings:[],phase:0};
-{
-  butterfly.root.add(butterfly.spin); butterfly.root.position.set(0,0.9,0); butterfly.root.rotation.x=-0.3; butterfly.root.scale.setScalar(0.6); jewel.add(butterfly.root);
-  const thorax=new THREE.Mesh(new THREE.SphereGeometry(0.08,12,10),M.ivory); butterfly.spin.add(thorax);
-  const heart=new THREE.Mesh(new THREE.SphereGeometry(0.05,10,8),glowMat(0xffd9a0,2.0)); butterfly.spin.add(heart); butterfly.heart=heart.material;
-  const wingGeo=makeWing();
-  for(const s of [1,-1]){const pivot=new THREE.Group(); pivot.position.set(0,0.02,0); pivot.scale.x=s; const wing=new THREE.Mesh(wingGeo,new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0.6})); pivot.add(wing); butterfly.spin.add(pivot); butterfly.wings.push({pivot,side:s});}
-}
-
-// Moments as glass pearls
-const COLORS={confirmed:0xe9c47a,expected:0xcfd9e8,proposed:0x8fb8d8,uncertain:0xd8a36a,waiting:0x9a9387,conflict:0xd97a7a};
-const moments=[
-  {id:'arrival',name:'Arrival',time:14,status:'confirmed'},{id:'ceremony',name:'Ceremony',time:16,status:'confirmed'},{id:'cocktail',name:'Cocktail',time:17,status:'confirmed'},{id:'photos',name:'Photos',time:17.5,status:'proposed'},{id:'dinner',name:'Dinner',time:19.5,status:'expected'},{id:'speeches',name:'Speeches',time:21,status:'expected'},{id:'firstdance',name:'First Dance',time:21.5,status:'proposed'},{id:'party',name:'Party',time:22,status:'confirmed'},{id:'departure',name:'Departure',time:23.5,status:'waiting'},
-];
-const TIME_MIN=13,TIME_MAX=25,ORBIT=2.35;
-function timeToAngle(t){return (t-TIME_MIN)/(TIME_MAX-TIME_MIN)*Math.PI*2 - Math.PI/2;}
-const pearlGroup=new THREE.Group(); jewel.add(pearlGroup);
-const pearls={};
-moments.forEach(m=>{
-  const g=new THREE.Group();
-  const pearl=new THREE.Mesh(new THREE.SphereGeometry(0.11,20,16), new THREE.MeshStandardMaterial({color:0xfaf6ee,emissive:COLORS[m.status],emissiveIntensity:0.5}));
-  g.add(pearl);
-  const halo=new THREE.Mesh(new THREE.RingGeometry(0.18,0.21,24), new THREE.MeshBasicMaterial({color:COLORS[m.status],transparent:true,opacity:0.35,side:THREE.DoubleSide})); halo.rotation.x=Math.PI/2; g.add(halo);
-  g.userData={pearl,halo,phase:Math.random()*6}; pearlGroup.add(g); pearls[m.id]=g;
-});
-
-// Pulses
-const pulseGeo=new THREE.SphereGeometry(1,16,12);
-const pulses=[];
-function spawnPulse(pos,s){
-  const mat=new THREE.MeshBasicMaterial({color:0xd8b878,transparent:true,opacity:0.3});
-  const mesh=new THREE.Mesh(pulseGeo,mat); mesh.position.copy(pos); mesh.scale.setScalar(0.01); scene.add(mesh);
-  pulses.push({mesh,mat,life:0,s});
-}
-
-// Loader
-let progress=0; const loader=document.getElementById('loader'), progEl=document.getElementById('loaderProgress');
-const loaderInterval=setInterval(()=>{progress+=Math.random()*18; if(progress>=100){progress=100; clearInterval(loaderInterval); progEl.textContent='100%'; setTimeout(()=>{loader.style.opacity='0'; setTimeout(()=>loader.style.display='none',1200);},600);} progEl.textContent=Math.floor(progress).toString().padStart(3,'0')+'%';},120);
-
-// Scroll story
-const sections=document.querySelectorAll('.section');
-const scrollRoot=document.getElementById('scrollRoot');
-let currentIndex=0;
-scrollRoot.addEventListener('scroll',()=>{
-  const st=scrollRoot.scrollTop;
-  const h=innerHeight;
-  const idx=Math.round(st/h);
-  if(idx!==currentIndex){
-    currentIndex=idx;
-    sections.forEach((s,i)=>s.classList.toggle('active',i===idx));
-    // trigger butterfly energy
-    const p=new THREE.Vector3(0,0.9,0); jewel.localToWorld(p); spawnPulse(p,0.8+idx*0.2);
-    // rotate jewel to match story
-    const targetY=idx*0.3;
-    // camera travel
-    const cams=[ [0,3.5,11], [2,4,10], [-2,3,10], [0,6,8] ];
-    const c=cams[Math.min(idx,cams.length-1)];
-    // simple tween
-    const start=performance.now();
-    const from= camera.position.clone();
-    const to=new THREE.Vector3(c[0],c[1],c[2]);
-    function tween(){
-      const k=Math.min(1,(performance.now()-start)/1200);
-      const e=1-Math.pow(1-k,3);
-      camera.position.lerpVectors(from,to,e);
-      if(k<1) requestAnimationFrame(tween);
-    }
-    tween();
-  }
-});
-
-// Click try
-document.getElementById('tryBtn').addEventListener('click',e=>{e.preventDefault(); scrollRoot.scrollTo({top:innerHeight,behavior:'smooth'});});
-
-// Features hover = pulse
-document.querySelectorAll('.feature').forEach(f=>{
-  f.addEventListener('mouseenter',()=>{
-    const p=new THREE.Vector3(0,0.9,0); jewel.localToWorld(p); spawnPulse(p,0.6);
-  });
-});
+const jewel=new THREE.Group(); jewel.position.y=0.6; scene.add(jewel);
+const base=new THREE.Mesh(new THREE.CylinderGeometry(3.0,3.2,0.16,48,1),M.ivory); base.position.y=-1.2; jewel.add(base);
+const outerRing=makeRing(2.8,0.045,M.gold); jewel.add(outerRing);
+const midRing=makeRing(2.25,0.03,M.steel); jewel.add(midRing);
+const innerRing=makeRing(1.55,0.035,M.gold); jewel.add(innerRing);
+function makeGear(r,teeth,mat){const g=new THREE.Group(); const body=new THREE.Mesh(new THREE.CylinderGeometry(r,r,0.05,20),mat); body.rotation.x=Math.PI/2; g.add(body); for(let i=0;i<teeth;i++){const a=(i/teeth)*Math.PI*2; const t=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.02,0.06),mat); t.position.set(Math.cos(a)*(r+0.02),Math.sin(a)*(r+0.02),0); t.rotation.z=a; g.add(t);} return g;}
+const gear1=makeGear(0.48,18,M.gold); gear1.position.set(1.8,0.3,0); jewel.add(gear1);
+const gear2=makeGear(0.3,12,M.steel); gear2.position.set(2.4,0.3,0); jewel.add(gear2);
+const core=new THREE.Mesh(new THREE.IcosahedronGeometry(0.38,1),M.glass); jewel.add(core);
+const coreInner=new THREE.Mesh(new THREE.SphereGeometry(0.22,16,12), new THREE.MeshStandardMaterial({color:0xfff2d8,emissive:0xffc878,emissiveIntensity:0.8,transparent:true,opacity:0.8})); jewel.add(coreInner);
 
 const clock=new THREE.Clock();
-let time=0, energy=0;
 function animate(){
   requestAnimationFrame(animate);
-  const dt=clock.getDelta(); time+=dt;
-  energy*=Math.exp(-dt*0.6);
-  // auto if not scrolling
-  if(scrollRoot.scrollTop<10){jewel.rotation.y+=dt*0.05;}
-  outerRing.rotation.z+=dt*0.04; midRing.rotation.z-=dt*0.06; innerRing.rotation.z+=dt*0.1;
-  gear1.rotation.z+=dt*0.4; gear2.rotation.z-=dt*0.6;
-  butterfly.phase+=dt*(3.5+energy*2); const flap=Math.sin(butterfly.phase); const ang=0.12+flap*0.45; for(const w of butterfly.wings) w.pivot.rotation.z=w.side*ang; butterfly.spin.rotation.y+=dt*0.15; if(butterfly.heart) butterfly.heart.emissiveIntensity=1.5+Math.abs(flap)*1.2+energy;
-  moments.forEach(m=>{const g=pearls[m.id]; const a=timeToAngle(m.time); const jx=Math.sin(time*1.2+g.userData.phase)*0.02; const jy=Math.cos(time*1.1+g.userData.phase)*0.02; g.position.set(Math.cos(a)*ORBIT+jx, jy+0.05, Math.sin(a)*ORBIT);});
-  for(let i=pulses.length-1;i>=0;i--){const p=pulses[i]; p.life+=dt; const k=p.life/1.2; p.mesh.scale.setScalar(0.1+k*5*p.s); p.mat.opacity=0.3*(1-k); if(k>=1){scene.remove(p.mesh); pulses.splice(i,1);}}
+  const dt=clock.getDelta();
+  outerRing.rotation.z+=dt*0.04; midRing.rotation.z-=dt*0.06; innerRing.rotation.z+=dt*0.09;
+  gear1.rotation.z+=dt*0.35; gear2.rotation.z-=dt*0.5;
+  core.rotation.y+=dt*0.15;
   controls.update();
   renderer.render(scene,camera);
 }
 animate();
+
+// loader
+let p=0; const bar=document.getElementById('barFill'), pct=document.getElementById('pct'), loader=document.getElementById('loader');
+const iv=setInterval(()=>{p+=Math.random()*20; if(p>=100){p=100; clearInterval(iv); bar.style.width='100%'; pct.textContent='100%'; setTimeout(()=>{loader.style.opacity='0'; setTimeout(()=>loader.style.display='none',800);},400);} else {bar.style.width=p+'%'; pct.textContent=Math.floor(p)+'%';}},90);
+
+// scroll free - no snap blocking
+const main=document.getElementById('main');
+main.addEventListener('scroll',()=>{ /* free */ });
+
+document.getElementById('enterBtn2').addEventListener('click',()=>{document.querySelector('.section').scrollIntoView({behavior:'smooth'});});
+
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight);});
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a3b8f16fd8819e57',t:'MTc4OTQ4OTA2Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
